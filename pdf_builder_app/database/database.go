@@ -15,5 +15,5 @@ type Config struct {
 }
 
 func (c Config) DSN() string {
-	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s", c.User, c.Pass, c.Host, c.Port, c.Name)
+	return fmt.Sprintf("%s:%s@%s:%d/%s", c.User, c.Pass, c.Host, c.Port, c.Name)
 }
