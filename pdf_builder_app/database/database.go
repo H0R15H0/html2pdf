@@ -2,8 +2,6 @@ package database
 
 import (
 	"fmt"
-
-	_ "github.com/lib/pq"
 )
 
 type Config struct {
@@ -15,5 +13,5 @@ type Config struct {
 }
 
 func (c Config) DSN() string {
-	return fmt.Sprintf("%s:%s@%s:%d/%s", c.User, c.Pass, c.Host, c.Port, c.Name)
+	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s", c.User, c.Pass, c.Host, c.Port, c.Name)
 }

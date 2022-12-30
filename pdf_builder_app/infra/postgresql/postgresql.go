@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/H0R15H0/html2pdf/pdf_builder_app/database"
+	_ "github.com/lib/pq"
 )
 
 func NewPostgresqlDB(user string, pass string, host string, port int, name string) (*sql.DB, error) {
