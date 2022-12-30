@@ -1,0 +1,25 @@
+version: '3.7'
+
+services:
+  pdf_builder_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+  gotenberg:
+    image: gotenberg/gotenberg:7
+    ports:
+      - '3000:3000'
+  postgresql:
+    image: postgres:14.6
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+    volumes:
+      - postgres-volume:/var/lib/postgresql/data
+    env_file:
+      - .env
+
+volumes:
+  postgres-volume:
