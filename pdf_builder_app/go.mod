@@ -2,7 +2,12 @@ module github.com/H0R15H0/html2pdf/pdf_builder_app
 
 go 1.18
 
-require github.com/labstack/echo/v4 v4.10.0
+require (
+	github.com/caarlos0/env/v6 v6.10.1
+	github.com/joho/godotenv v1.4.0
+	github.com/labstack/echo/v4 v4.10.0
+	github.com/lib/pq v1.10.7
+)
 
 require (
 	github.com/labstack/gommon v0.4.0 // indirect
