@@ -5,6 +5,8 @@ import (
 
 	"github.com/H0R15H0/html2pdf/pdf_builder_app/domain/entities"
 	"github.com/H0R15H0/html2pdf/pdf_builder_app/domain/repositories"
+	"github.com/H0R15H0/html2pdf/pdf_builder_app/domain/values"
+	"github.com/google/uuid"
 )
 
 type UserUsecaseGetUserCommand struct {
@@ -28,7 +30,11 @@ func NewUserUsecase(u repositories.UserRepo) UserUsecase {
 
 func (u *userUsecase) GetUser(ctx context.Context, cmd UserUsecaseGetUserCommand) (*entities.User, error) {
 	id := cmd.ID
-	user, err := u.userRepo.FindUser(ctx, id)
+	uuid, err := uuid.Parse(id)
+	if err != nil {
+		return nil, err
+	}
+	user, err := u.userRepo.FindUser(ctx, values.UserID(uuid))
 	if err != nil {
 		return nil, err
 	}
