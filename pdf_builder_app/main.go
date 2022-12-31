@@ -25,13 +25,16 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	handlers.NewPdfHandler(repositories.NewPdfRepo(db))
 	userRepo := repositories.NewUserRepo(db)
+	pdfRepo := repositories.NewPdfRepo(db)
 	userUsecase := usecases.NewUserUsecase(userRepo)
+	usersPdfUsecase := usecases.NewUsersPdfUsecase(pdfRepo, userRepo)
+	usersPdfHandlers := handlers.NewUsersPdfHandler(usersPdfUsecase)
 	userHandler := handlers.NewUserHandler(userUsecase)
 
 	e.GET("/users/:id", userHandler.GetUser)
 	e.POST("/users", userHandler.CreateUser)
+	e.POST("/users/:id/pdfs", usersPdfHandlers.InitializeUsersPdf)
 
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", cnf.Port)))
 }
