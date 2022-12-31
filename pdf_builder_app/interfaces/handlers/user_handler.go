@@ -28,7 +28,13 @@ func (u *userHandler) GetUser(c echo.Context) error {
 
 	user, err := u.userRepo.FindUser(ctx, id)
 	if err != nil {
-		return err
+		return JsonError(c, err, &APIError{
+			Message: "ユーザーが見つかりませんでした",
+			Status:  http.StatusInternalServerError,
+			Code:    ErrCodeText(CodeClientHoge),
+		})
 	}
-	return c.String(http.StatusOK, user.ID)
+
+	data := map[string]interface{}{"user": user}
+	return c.JSON(http.StatusOK, data)
 }
