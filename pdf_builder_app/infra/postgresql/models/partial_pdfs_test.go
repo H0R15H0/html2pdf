@@ -503,7 +503,7 @@ func testPartialPDFToOneUsersPDFUsingUnifiedPDF(t *testing.T) {
 	var foreign UsersPDF
 
 	seed := randomize.NewSeed()
-	if err := randomize.Struct(seed, &local, partialPDFDBTypes, true, partialPDFColumnsWithDefault...); err != nil {
+	if err := randomize.Struct(seed, &local, partialPDFDBTypes, false, partialPDFColumnsWithDefault...); err != nil {
 		t.Errorf("Unable to randomize PartialPDF struct: %s", err)
 	}
 	if err := randomize.Struct(seed, &foreign, usersPDFDBTypes, false, usersPDFColumnsWithDefault...); err != nil {
@@ -514,7 +514,7 @@ func testPartialPDFToOneUsersPDFUsingUnifiedPDF(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	queries.Assign(&local.UnifiedPDFID, foreign.ID)
+	local.UnifiedPDFID = foreign.ID
 	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
@@ -524,7 +524,7 @@ func testPartialPDFToOneUsersPDFUsingUnifiedPDF(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !queries.Equal(check.ID, foreign.ID) {
+	if check.ID != foreign.ID {
 		t.Errorf("want: %v, got %v", foreign.ID, check.ID)
 	}
 
@@ -596,7 +596,7 @@ func testPartialPDFToOneSetOpUsersPDFUsingUnifiedPDF(t *testing.T) {
 		if x.R.UnifiedPDFPartialPDFS[0] != &a {
 			t.Error("failed to append to foreign relationship struct")
 		}
-		if !queries.Equal(a.UnifiedPDFID, x.ID) {
+		if a.UnifiedPDFID != x.ID {
 			t.Error("foreign key was wrong value", a.UnifiedPDFID)
 		}
 
@@ -607,60 +607,9 @@ func testPartialPDFToOneSetOpUsersPDFUsingUnifiedPDF(t *testing.T) {
 			t.Fatal("failed to reload", err)
 		}
 
-		if !queries.Equal(a.UnifiedPDFID, x.ID) {
+		if a.UnifiedPDFID != x.ID {
 			t.Error("foreign key was wrong value", a.UnifiedPDFID, x.ID)
 		}
-	}
-}
-
-func testPartialPDFToOneRemoveOpUsersPDFUsingUnifiedPDF(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a PartialPDF
-	var b UsersPDF
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, partialPDFDBTypes, false, strmangle.SetComplement(partialPDFPrimaryKeyColumns, partialPDFColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	if err = randomize.Struct(seed, &b, usersPDFDBTypes, false, strmangle.SetComplement(usersPDFPrimaryKeyColumns, usersPDFColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.SetUnifiedPDF(ctx, tx, true, &b); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.RemoveUnifiedPDF(ctx, tx, &b); err != nil {
-		t.Error("failed to remove relationship")
-	}
-
-	count, err := a.UnifiedPDF().Count(ctx, tx)
-	if err != nil {
-		t.Error(err)
-	}
-	if count != 0 {
-		t.Error("want no relationships remaining")
-	}
-
-	if a.R.UnifiedPDF != nil {
-		t.Error("R struct entry should be nil")
-	}
-
-	if !queries.IsValuerNil(a.UnifiedPDFID) {
-		t.Error("foreign key value should be nil")
-	}
-
-	if len(b.R.UnifiedPDFPartialPDFS) != 0 {
-		t.Error("failed to remove a from b's relationships")
 	}
 }
 

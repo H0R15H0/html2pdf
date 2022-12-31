@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS partial_pdfs(
    id UUID PRIMARY KEY,
-   unified_pdf_id UUID REFERENCES users_pdfs(id),
+   unified_pdf_id UUID NOT NULL REFERENCES users_pdfs(id),
    source_html_url TEXT NOT NULL,
    number INT NOT NULL,
    s3_url TEXT NOT NULL,

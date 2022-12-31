@@ -27,14 +27,18 @@ func main() {
 	}
 	userRepo := repositories.NewUserRepo(db)
 	pdfRepo := repositories.NewPdfRepo(db)
+	partialPdfRepo := repositories.NewPartialPdfRepo(db)
 	userUsecase := usecases.NewUserUsecase(userRepo)
 	pdfUsecase := usecases.NewPdfUsecase(pdfRepo, userRepo)
-	usersPdfHandlers := handlers.NewUsersPdfHandler(pdfUsecase)
+	partialPdfUsecase := usecases.NewPartialPdfUsecase(partialPdfRepo)
 	userHandler := handlers.NewUserHandler(userUsecase)
+	usersPdfHandler := handlers.NewUsersPdfHandler(pdfUsecase)
+	partialPdfHandler := handlers.NewPartialPdfHandler(partialPdfUsecase)
 
 	e.GET("/users/:id", userHandler.GetUser)
 	e.POST("/users", userHandler.CreateUser)
-	e.POST("/users/:id/pdfs", usersPdfHandlers.InitializeUsersPdf)
+	e.POST("/users/:id/pdfs", usersPdfHandler.InitializeUsersPdf)
+	e.POST("/users/:user_id/pdfs/:pdf_id/partials", partialPdfHandler.Create)
 
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", cnf.Port)))
 }

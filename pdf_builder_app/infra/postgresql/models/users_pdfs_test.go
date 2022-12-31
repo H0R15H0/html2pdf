@@ -519,8 +519,9 @@ func testUsersPDFToManyUnifiedPDFPartialPDFS(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	queries.Assign(&b.UnifiedPDFID, a.ID)
-	queries.Assign(&c.UnifiedPDFID, a.ID)
+	b.UnifiedPDFID = a.ID
+	c.UnifiedPDFID = a.ID
+
 	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
@@ -535,10 +536,10 @@ func testUsersPDFToManyUnifiedPDFPartialPDFS(t *testing.T) {
 
 	bFound, cFound := false, false
 	for _, v := range check {
-		if queries.Equal(v.UnifiedPDFID, b.UnifiedPDFID) {
+		if v.UnifiedPDFID == b.UnifiedPDFID {
 			bFound = true
 		}
-		if queries.Equal(v.UnifiedPDFID, c.UnifiedPDFID) {
+		if v.UnifiedPDFID == c.UnifiedPDFID {
 			cFound = true
 		}
 	}
@@ -616,10 +617,10 @@ func testUsersPDFToManyAddOpUnifiedPDFPartialPDFS(t *testing.T) {
 		first := x[0]
 		second := x[1]
 
-		if !queries.Equal(a.ID, first.UnifiedPDFID) {
+		if a.ID != first.UnifiedPDFID {
 			t.Error("foreign key was wrong value", a.ID, first.UnifiedPDFID)
 		}
-		if !queries.Equal(a.ID, second.UnifiedPDFID) {
+		if a.ID != second.UnifiedPDFID {
 			t.Error("foreign key was wrong value", a.ID, second.UnifiedPDFID)
 		}
 
@@ -646,182 +647,6 @@ func testUsersPDFToManyAddOpUnifiedPDFPartialPDFS(t *testing.T) {
 		}
 	}
 }
-
-func testUsersPDFToManySetOpUnifiedPDFPartialPDFS(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a UsersPDF
-	var b, c, d, e PartialPDF
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, usersPDFDBTypes, false, strmangle.SetComplement(usersPDFPrimaryKeyColumns, usersPDFColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	foreigners := []*PartialPDF{&b, &c, &d, &e}
-	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, partialPDFDBTypes, false, strmangle.SetComplement(partialPDFPrimaryKeyColumns, partialPDFColumnsWithoutDefault)...); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	err = a.SetUnifiedPDFPartialPDFS(ctx, tx, false, &b, &c)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err := a.UnifiedPDFPartialPDFS().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	err = a.SetUnifiedPDFPartialPDFS(ctx, tx, true, &d, &e)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err = a.UnifiedPDFPartialPDFS().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	if !queries.IsValuerNil(b.UnifiedPDFID) {
-		t.Error("want b's foreign key value to be nil")
-	}
-	if !queries.IsValuerNil(c.UnifiedPDFID) {
-		t.Error("want c's foreign key value to be nil")
-	}
-	if !queries.Equal(a.ID, d.UnifiedPDFID) {
-		t.Error("foreign key was wrong value", a.ID, d.UnifiedPDFID)
-	}
-	if !queries.Equal(a.ID, e.UnifiedPDFID) {
-		t.Error("foreign key was wrong value", a.ID, e.UnifiedPDFID)
-	}
-
-	if b.R.UnifiedPDF != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if c.R.UnifiedPDF != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if d.R.UnifiedPDF != &a {
-		t.Error("relationship was not added properly to the foreign struct")
-	}
-	if e.R.UnifiedPDF != &a {
-		t.Error("relationship was not added properly to the foreign struct")
-	}
-
-	if a.R.UnifiedPDFPartialPDFS[0] != &d {
-		t.Error("relationship struct slice not set to correct value")
-	}
-	if a.R.UnifiedPDFPartialPDFS[1] != &e {
-		t.Error("relationship struct slice not set to correct value")
-	}
-}
-
-func testUsersPDFToManyRemoveOpUnifiedPDFPartialPDFS(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a UsersPDF
-	var b, c, d, e PartialPDF
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, usersPDFDBTypes, false, strmangle.SetComplement(usersPDFPrimaryKeyColumns, usersPDFColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	foreigners := []*PartialPDF{&b, &c, &d, &e}
-	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, partialPDFDBTypes, false, strmangle.SetComplement(partialPDFPrimaryKeyColumns, partialPDFColumnsWithoutDefault)...); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	err = a.AddUnifiedPDFPartialPDFS(ctx, tx, true, foreigners...)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err := a.UnifiedPDFPartialPDFS().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 4 {
-		t.Error("count was wrong:", count)
-	}
-
-	err = a.RemoveUnifiedPDFPartialPDFS(ctx, tx, foreigners[:2]...)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err = a.UnifiedPDFPartialPDFS().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	if !queries.IsValuerNil(b.UnifiedPDFID) {
-		t.Error("want b's foreign key value to be nil")
-	}
-	if !queries.IsValuerNil(c.UnifiedPDFID) {
-		t.Error("want c's foreign key value to be nil")
-	}
-
-	if b.R.UnifiedPDF != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if c.R.UnifiedPDF != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if d.R.UnifiedPDF != &a {
-		t.Error("relationship to a should have been preserved")
-	}
-	if e.R.UnifiedPDF != &a {
-		t.Error("relationship to a should have been preserved")
-	}
-
-	if len(a.R.UnifiedPDFPartialPDFS) != 2 {
-		t.Error("should have preserved two relationships")
-	}
-
-	// Removal doesn't do a stable deletion for performance so we have to flip the order
-	if a.R.UnifiedPDFPartialPDFS[1] != &d {
-		t.Error("relationship to d should have been preserved")
-	}
-	if a.R.UnifiedPDFPartialPDFS[0] != &e {
-		t.Error("relationship to e should have been preserved")
-	}
-}
-
 func testUsersPDFToOneUserUsingUser(t *testing.T) {
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))

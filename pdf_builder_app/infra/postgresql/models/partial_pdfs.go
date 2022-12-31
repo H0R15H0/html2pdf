@@ -24,12 +24,12 @@ import (
 
 // PartialPDF is an object representing the database table.
 type PartialPDF struct {
-	ID            string      `boil:"id" json:"id" toml:"id" yaml:"id"`
-	UnifiedPDFID  null.String `boil:"unified_pdf_id" json:"unified_pdf_id,omitempty" toml:"unified_pdf_id" yaml:"unified_pdf_id,omitempty"`
-	SourceHTMLURL string      `boil:"source_html_url" json:"source_html_url" toml:"source_html_url" yaml:"source_html_url"`
-	Number        int         `boil:"number" json:"number" toml:"number" yaml:"number"`
-	S3URL         string      `boil:"s3_url" json:"s3_url" toml:"s3_url" yaml:"s3_url"`
-	PDFCreatedAt  null.Time   `boil:"pdf_created_at" json:"pdf_created_at,omitempty" toml:"pdf_created_at" yaml:"pdf_created_at,omitempty"`
+	ID            string    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	UnifiedPDFID  string    `boil:"unified_pdf_id" json:"unified_pdf_id" toml:"unified_pdf_id" yaml:"unified_pdf_id"`
+	SourceHTMLURL string    `boil:"source_html_url" json:"source_html_url" toml:"source_html_url" yaml:"source_html_url"`
+	Number        int       `boil:"number" json:"number" toml:"number" yaml:"number"`
+	S3URL         string    `boil:"s3_url" json:"s3_url" toml:"s3_url" yaml:"s3_url"`
+	PDFCreatedAt  null.Time `boil:"pdf_created_at" json:"pdf_created_at,omitempty" toml:"pdf_created_at" yaml:"pdf_created_at,omitempty"`
 
 	R *partialPDFR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L partialPDFL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -92,44 +92,6 @@ func (w whereHelperstring) NIN(slice []string) qm.QueryMod {
 	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
 }
 
-type whereHelpernull_String struct{ field string }
-
-func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-func (w whereHelpernull_String) IN(slice []string) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
-}
-func (w whereHelpernull_String) NIN(slice []string) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
-}
-
-func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-
 type whereHelperint struct{ field string }
 
 func (w whereHelperint) EQ(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
@@ -179,14 +141,14 @@ func (w whereHelpernull_Time) IsNotNull() qm.QueryMod { return qmhelper.WhereIsN
 
 var PartialPDFWhere = struct {
 	ID            whereHelperstring
-	UnifiedPDFID  whereHelpernull_String
+	UnifiedPDFID  whereHelperstring
 	SourceHTMLURL whereHelperstring
 	Number        whereHelperint
 	S3URL         whereHelperstring
 	PDFCreatedAt  whereHelpernull_Time
 }{
 	ID:            whereHelperstring{field: "\"partial_pdfs\".\"id\""},
-	UnifiedPDFID:  whereHelpernull_String{field: "\"partial_pdfs\".\"unified_pdf_id\""},
+	UnifiedPDFID:  whereHelperstring{field: "\"partial_pdfs\".\"unified_pdf_id\""},
 	SourceHTMLURL: whereHelperstring{field: "\"partial_pdfs\".\"source_html_url\""},
 	Number:        whereHelperint{field: "\"partial_pdfs\".\"number\""},
 	S3URL:         whereHelperstring{field: "\"partial_pdfs\".\"s3_url\""},
@@ -222,8 +184,8 @@ type partialPDFL struct{}
 
 var (
 	partialPDFAllColumns            = []string{"id", "unified_pdf_id", "source_html_url", "number", "s3_url", "pdf_created_at"}
-	partialPDFColumnsWithoutDefault = []string{"id", "source_html_url", "number", "s3_url"}
-	partialPDFColumnsWithDefault    = []string{"unified_pdf_id", "pdf_created_at"}
+	partialPDFColumnsWithoutDefault = []string{"id", "unified_pdf_id", "source_html_url", "number", "s3_url"}
+	partialPDFColumnsWithDefault    = []string{"pdf_created_at"}
 	partialPDFPrimaryKeyColumns     = []string{"id"}
 	partialPDFGeneratedColumns      = []string{}
 )
@@ -550,9 +512,7 @@ func (partialPDFL) LoadUnifiedPDF(ctx context.Context, e boil.ContextExecutor, s
 		if object.R == nil {
 			object.R = &partialPDFR{}
 		}
-		if !queries.IsNil(object.UnifiedPDFID) {
-			args = append(args, object.UnifiedPDFID)
-		}
+		args = append(args, object.UnifiedPDFID)
 
 	} else {
 	Outer:
@@ -562,14 +522,12 @@ func (partialPDFL) LoadUnifiedPDF(ctx context.Context, e boil.ContextExecutor, s
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.UnifiedPDFID) {
+				if a == obj.UnifiedPDFID {
 					continue Outer
 				}
 			}
 
-			if !queries.IsNil(obj.UnifiedPDFID) {
-				args = append(args, obj.UnifiedPDFID)
-			}
+			args = append(args, obj.UnifiedPDFID)
 
 		}
 	}
@@ -627,7 +585,7 @@ func (partialPDFL) LoadUnifiedPDF(ctx context.Context, e boil.ContextExecutor, s
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.UnifiedPDFID, foreign.ID) {
+			if local.UnifiedPDFID == foreign.ID {
 				local.R.UnifiedPDF = foreign
 				if foreign.R == nil {
 					foreign.R = &usersPDFR{}
@@ -668,7 +626,7 @@ func (o *PartialPDF) SetUnifiedPDF(ctx context.Context, exec boil.ContextExecuto
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	queries.Assign(&o.UnifiedPDFID, related.ID)
+	o.UnifiedPDFID = related.ID
 	if o.R == nil {
 		o.R = &partialPDFR{
 			UnifiedPDF: related,
@@ -685,39 +643,6 @@ func (o *PartialPDF) SetUnifiedPDF(ctx context.Context, exec boil.ContextExecuto
 		related.R.UnifiedPDFPartialPDFS = append(related.R.UnifiedPDFPartialPDFS, o)
 	}
 
-	return nil
-}
-
-// RemoveUnifiedPDF relationship.
-// Sets o.R.UnifiedPDF to nil.
-// Removes o from all passed in related items' relationships struct.
-func (o *PartialPDF) RemoveUnifiedPDF(ctx context.Context, exec boil.ContextExecutor, related *UsersPDF) error {
-	var err error
-
-	queries.SetScanner(&o.UnifiedPDFID, nil)
-	if _, err = o.Update(ctx, exec, boil.Whitelist("unified_pdf_id")); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	if o.R != nil {
-		o.R.UnifiedPDF = nil
-	}
-	if related == nil || related.R == nil {
-		return nil
-	}
-
-	for i, ri := range related.R.UnifiedPDFPartialPDFS {
-		if queries.Equal(o.UnifiedPDFID, ri.UnifiedPDFID) {
-			continue
-		}
-
-		ln := len(related.R.UnifiedPDFPartialPDFS)
-		if ln > 1 && i < ln-1 {
-			related.R.UnifiedPDFPartialPDFS[i] = related.R.UnifiedPDFPartialPDFS[ln-1]
-		}
-		related.R.UnifiedPDFPartialPDFS = related.R.UnifiedPDFPartialPDFS[:ln-1]
-		break
-	}
 	return nil
 }
 

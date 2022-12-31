@@ -581,7 +581,7 @@ func (usersPDFL) LoadUnifiedPDFPartialPDFS(ctx context.Context, e boil.ContextEx
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.ID) {
+				if a == obj.ID {
 					continue Outer
 				}
 			}
@@ -639,7 +639,7 @@ func (usersPDFL) LoadUnifiedPDFPartialPDFS(ctx context.Context, e boil.ContextEx
 
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
-			if queries.Equal(local.ID, foreign.UnifiedPDFID) {
+			if local.ID == foreign.UnifiedPDFID {
 				local.R.UnifiedPDFPartialPDFS = append(local.R.UnifiedPDFPartialPDFS, foreign)
 				if foreign.R == nil {
 					foreign.R = &partialPDFR{}
@@ -708,7 +708,7 @@ func (o *UsersPDF) AddUnifiedPDFPartialPDFS(ctx context.Context, exec boil.Conte
 	var err error
 	for _, rel := range related {
 		if insert {
-			queries.Assign(&rel.UnifiedPDFID, o.ID)
+			rel.UnifiedPDFID = o.ID
 			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
 				return errors.Wrap(err, "failed to insert into foreign table")
 			}
@@ -729,7 +729,7 @@ func (o *UsersPDF) AddUnifiedPDFPartialPDFS(ctx context.Context, exec boil.Conte
 				return errors.Wrap(err, "failed to update foreign table")
 			}
 
-			queries.Assign(&rel.UnifiedPDFID, o.ID)
+			rel.UnifiedPDFID = o.ID
 		}
 	}
 
@@ -750,80 +750,6 @@ func (o *UsersPDF) AddUnifiedPDFPartialPDFS(ctx context.Context, exec boil.Conte
 			rel.R.UnifiedPDF = o
 		}
 	}
-	return nil
-}
-
-// SetUnifiedPDFPartialPDFS removes all previously related items of the
-// users_pdf replacing them completely with the passed
-// in related items, optionally inserting them as new records.
-// Sets o.R.UnifiedPDF's UnifiedPDFPartialPDFS accordingly.
-// Replaces o.R.UnifiedPDFPartialPDFS with related.
-// Sets related.R.UnifiedPDF's UnifiedPDFPartialPDFS accordingly.
-func (o *UsersPDF) SetUnifiedPDFPartialPDFS(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*PartialPDF) error {
-	query := "update \"partial_pdfs\" set \"unified_pdf_id\" = null where \"unified_pdf_id\" = $1"
-	values := []interface{}{o.ID}
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, query)
-		fmt.Fprintln(writer, values)
-	}
-	_, err := exec.ExecContext(ctx, query, values...)
-	if err != nil {
-		return errors.Wrap(err, "failed to remove relationships before set")
-	}
-
-	if o.R != nil {
-		for _, rel := range o.R.UnifiedPDFPartialPDFS {
-			queries.SetScanner(&rel.UnifiedPDFID, nil)
-			if rel.R == nil {
-				continue
-			}
-
-			rel.R.UnifiedPDF = nil
-		}
-		o.R.UnifiedPDFPartialPDFS = nil
-	}
-
-	return o.AddUnifiedPDFPartialPDFS(ctx, exec, insert, related...)
-}
-
-// RemoveUnifiedPDFPartialPDFS relationships from objects passed in.
-// Removes related items from R.UnifiedPDFPartialPDFS (uses pointer comparison, removal does not keep order)
-// Sets related.R.UnifiedPDF.
-func (o *UsersPDF) RemoveUnifiedPDFPartialPDFS(ctx context.Context, exec boil.ContextExecutor, related ...*PartialPDF) error {
-	if len(related) == 0 {
-		return nil
-	}
-
-	var err error
-	for _, rel := range related {
-		queries.SetScanner(&rel.UnifiedPDFID, nil)
-		if rel.R != nil {
-			rel.R.UnifiedPDF = nil
-		}
-		if _, err = rel.Update(ctx, exec, boil.Whitelist("unified_pdf_id")); err != nil {
-			return err
-		}
-	}
-	if o.R == nil {
-		return nil
-	}
-
-	for _, rel := range related {
-		for i, ri := range o.R.UnifiedPDFPartialPDFS {
-			if rel != ri {
-				continue
-			}
-
-			ln := len(o.R.UnifiedPDFPartialPDFS)
-			if ln > 1 && i < ln-1 {
-				o.R.UnifiedPDFPartialPDFS[i] = o.R.UnifiedPDFPartialPDFS[ln-1]
-			}
-			o.R.UnifiedPDFPartialPDFS = o.R.UnifiedPDFPartialPDFS[:ln-1]
-			break
-		}
-	}
-
 	return nil
 }
 
