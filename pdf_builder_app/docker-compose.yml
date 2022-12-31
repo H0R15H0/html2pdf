@@ -24,6 +24,7 @@ services:
       POSTGRES_PASSWORD: "${DB_PASS}"
     volumes:
       - postgres-volume:/var/lib/postgresql/data
+      - ./database/seeds:/seeds
     env_file:
       - .env
 

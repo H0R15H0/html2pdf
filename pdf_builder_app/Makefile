@@ -52,11 +52,13 @@ postgres-psql: ## docker compose run --rm postgresql psql
 db-create: ## create database
 	$(DOCKERCOMPOSE) exec $(POSTGRESQL_SERVICE) bash -c "psql -U $$DB_USER -c 'create database $(DB_NAME)'"
 db-migrate: ## migrate all
-	$(DOCKERCOMPOSE) exec $(PDF_BUILDER_SERVICE) sh -c "migrate -database postgres://$$DB_USER:$$DB_PASS@$$DB_HOST:$$DB_PORT/$$DB_NAME?sslmode=disable -path database/migrations up"
+	$(DOCKERCOMPOSE) exec $(PDF_BUILDER_SERVICE) sh -c 'migrate -database postgres://$$DB_USER:$$DB_PASS@$$DB_HOST:$$DB_PORT/$$DB_NAME?sslmode=disable -path database/migrations up'
 db-down: ## down all table
-	$(DOCKERCOMPOSE) exec $(PDF_BUILDER_SERVICE) sh -c "migrate -database postgres://$$DB_USER:$$DB_PASS@$$DB_HOST:$$DB_PORT/$$DB_NAME?sslmode=disable -path database/migrations down"
+	$(DOCKERCOMPOSE) exec $(PDF_BUILDER_SERVICE) sh -c 'migrate -database postgres://$$DB_USER:$$DB_PASS@$$DB_HOST:$$DB_PORT/$$DB_NAME?sslmode=disable -path database/migrations down'
 db-migrate-create: ## create migration file. pass FILE_NAME
-	$(DOCKERCOMPOSE) exec $(PDF_BUILDER_SERVICE) sh -c "migrate create -ext sql -dir database/migrations -seq ${FILE_NAME}"
+	$(DOCKERCOMPOSE) exec $(PDF_BUILDER_SERVICE) sh -c 'migrate create -ext sql -dir database/migrations -seq ${FILE_NAME}'
+db-seeds: ## INSERT seeds
+	$(DOCKERCOMPOSE) exec -T $(POSTGRESQL_SERVICE) bash -c 'psql -U $$DB_USER -d $$DB_NAME -f /seeds/development.sql'
 
 ## SQLBoiler
 db-generate-models: ## create migration file. pass FILE_NAME
