@@ -5,6 +5,7 @@ TMP_CONTAINER_NAME := tmp_container
 PDF_BUILDER_SERVICE := pdf_builder_app
 POSTGRESQL_SERVICE := postgresql
 DB_NAME := pdf_builder_app
+BIN_FULL_DIR := $(abspath bin)
 
 # define standard colors
 ifneq (,$(findstring xterm,${TERM}))
@@ -56,6 +57,10 @@ db-down: ## down all table
 	$(DOCKERCOMPOSE) exec $(PDF_BUILDER_SERVICE) sh -c "migrate -database postgres://$$DB_USER:$$DB_PASS@$$DB_HOST:$$DB_PORT/$$DB_NAME?sslmode=disable -path database/migrations down"
 db-migrate-create: ## create migration file. pass FILE_NAME
 	$(DOCKERCOMPOSE) exec $(PDF_BUILDER_SERVICE) sh -c "migrate create -ext sql -dir database/migrations -seq ${FILE_NAME}"
+
+## SQLBoiler
+db-generate-models: ## create migration file. pass FILE_NAME
+	$(DOCKERCOMPOSE) exec $(PDF_BUILDER_SERVICE) sqlboiler psql -c sqlboiler.development.toml --wipe
 
 ## Help:
 help: ## Show this help.

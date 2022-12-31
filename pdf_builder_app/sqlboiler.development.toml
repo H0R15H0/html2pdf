@@ -1,0 +1,11 @@
+output   = "infra/postgresql/models"
+wipe     = true
+
+[psql]
+  dbname = "pdf_builder_app"
+  host   = "postgresql"
+  port   = 5432
+  user   = "root"
+  pass   = "password"
+  sslmode = "disable"
+  blacklist = ["migrations"]

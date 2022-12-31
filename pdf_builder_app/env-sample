@@ -1,0 +1,6 @@
+DB_USER=root
+DB_PASS=password
+DB_HOST=postgresql
+DB_PORT=5432
+DB_NAME=pdf_builder_app
+PORT=1323
