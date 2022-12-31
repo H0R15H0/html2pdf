@@ -8,12 +8,12 @@ import (
 	"github.com/H0R15H0/html2pdf/pdf_builder_app/domain/values"
 )
 
-type PdfUsecaseConvertHtml2PdfCommand struct {
+type PdfUsecaseCreateCommand struct {
 	UserID string
 }
 
 type PdfUsecase interface {
-	ConvertHtml2Pdf(context.Context, PdfUsecaseConvertHtml2PdfCommand) (*entities.Pdf, error)
+	Create(context.Context, PdfUsecaseCreateCommand) (*entities.Pdf, error)
 }
 
 type pdfUsecase struct {
@@ -25,7 +25,7 @@ func NewPdfUsecase(up repositories.PdfRepo, u repositories.UserRepo) PdfUsecase 
 	return &pdfUsecase{pdfRepo: up, userRepo: u}
 }
 
-func (u *pdfUsecase) ConvertHtml2Pdf(ctx context.Context, cmd PdfUsecaseConvertHtml2PdfCommand) (*entities.Pdf, error) {
+func (u *pdfUsecase) Create(ctx context.Context, cmd PdfUsecaseCreateCommand) (*entities.Pdf, error) {
 	userID, err := values.UserIDString(cmd.UserID)
 	if err != nil {
 		return nil, err
