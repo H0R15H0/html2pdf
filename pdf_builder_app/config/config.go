@@ -8,8 +8,9 @@ import (
 )
 
 type config struct {
-	Port     int      `env:"PORT" envDefault:"1323"`
-	DBConfig DBConfig `envPrefix:"DB_"`
+	Port                  int      `env:"PORT" envDefault:"1323"`
+	Html2PdfServiceOrigin string   `env:"HTML2PDF_SERVICE_ORIGIN,required"`
+	DBConfig              DBConfig `envPrefix:"DB_"`
 }
 
 type DBConfig struct {
