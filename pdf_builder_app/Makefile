@@ -35,6 +35,8 @@ up: ## docker compose up
 	$(DOCKERCOMPOSE) up
 up-d: ## docker compose up -d
 	$(DOCKERCOMPOSE) up -d
+restart: ## docker compose restart pdf_builder_app
+	$(DOCKERCOMPOSE) restart pdf_builder_app
 stop: ## docker compose stop
 	$(DOCKERCOMPOSE) stop
 down: ## docker compose down
