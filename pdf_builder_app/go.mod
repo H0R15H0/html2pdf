@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/caarlos0/env/v6 v6.10.1
 	github.com/friendsofgo/errors v0.9.2
+	github.com/google/uuid v1.3.0
 	github.com/joho/godotenv v1.4.0
 	github.com/kat-co/vala v0.0.0-20170210184112-42e1d8b61f12
 	github.com/labstack/echo/v4 v4.10.0

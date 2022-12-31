@@ -28,6 +28,7 @@ func main() {
 	userHandler := handlers.NewUserHandler(repositories.NewUserRepo(db))
 
 	e.GET("/users/:id", userHandler.GetUser)
+	e.POST("/users", userHandler.CreateUser)
 
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", cnf.Port)))
 }

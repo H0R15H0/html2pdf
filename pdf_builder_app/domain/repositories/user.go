@@ -8,4 +8,5 @@ import (
 
 type UserRepo interface {
 	FindUser(context.Context, string) (*entities.User, error)
+	CreateUser(context.Context) (*entities.User, error)
 }
