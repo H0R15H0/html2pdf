@@ -48,7 +48,7 @@ api-sh: ## docker compose run --rm pdf_builder_app sh
 postgres-bash: ## docker compose run --rm postgresql bash 
 	$(DOCKERCOMPOSE) exec $(POSTGRESQL_SERVICE) bash
 postgres-psql: ## docker compose run --rm postgresql psql 
-	$(DOCKERCOMPOSE) exec $(POSTGRESQL_SERVICE) bash -c "psql -U $$DB_USER -d $$DB_NAME"
+	$(DOCKERCOMPOSE) exec $(POSTGRESQL_SERVICE) bash -c 'psql -U $$DB_USER -d $$DB_NAME'
 
 ## Database
 db-create: ## create database
