@@ -3,7 +3,7 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/H0R15H0/html2pdf/pdf_builder_app/domain/repositories"
+	"github.com/H0R15H0/html2pdf/pdf_builder_app/usecases"
 	"github.com/labstack/echo/v4"
 )
 
@@ -13,21 +13,22 @@ type UserHandler interface {
 }
 
 type userHandler struct {
-	userRepo repositories.UserRepo
+	userUsecase usecases.UserUsecase
 }
 
-func NewUserHandler(userRepo repositories.UserRepo) UserHandler {
+func NewUserHandler(userUsecase usecases.UserUsecase) UserHandler {
 	return &userHandler{
-		userRepo: userRepo,
+		userUsecase: userUsecase,
 	}
 }
 
 func (u *userHandler) GetUser(c echo.Context) error {
-	id := c.Param("id")
-
 	ctx := c.Request().Context()
 
-	user, err := u.userRepo.FindUser(ctx, id)
+	id := c.Param("id")
+	cmd := usecases.UserUsecaseGetUserCommand{ID: id}
+
+	user, err := u.userUsecase.GetUser(ctx, cmd)
 	if err != nil {
 		return JsonError(c, err, &APIError{
 			Message: "ユーザーが見つかりませんでした",
@@ -43,7 +44,7 @@ func (u *userHandler) GetUser(c echo.Context) error {
 func (u *userHandler) CreateUser(c echo.Context) error {
 	ctx := c.Request().Context()
 
-	user, err := u.userRepo.CreateUser(ctx)
+	user, err := u.userUsecase.CreateUser(ctx, usecases.UserUsecaseCreateUserCommand{})
 	if err != nil {
 		return JsonError(c, err, &APIError{
 			Message: "ユーザーが作成できませんでした",

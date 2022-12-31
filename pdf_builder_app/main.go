@@ -8,6 +8,7 @@ import (
 	"github.com/H0R15H0/html2pdf/pdf_builder_app/infra/postgresql"
 	"github.com/H0R15H0/html2pdf/pdf_builder_app/infra/postgresql/repositories"
 	"github.com/H0R15H0/html2pdf/pdf_builder_app/interfaces/handlers"
+	"github.com/H0R15H0/html2pdf/pdf_builder_app/usecases"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -25,7 +26,9 @@ func main() {
 		panic(err)
 	}
 	handlers.NewPdfHandler(repositories.NewPdfRepo(db))
-	userHandler := handlers.NewUserHandler(repositories.NewUserRepo(db))
+	userRepo := repositories.NewUserRepo(db)
+	userUsecase := usecases.NewUserUsecase(userRepo)
+	userHandler := handlers.NewUserHandler(userUsecase)
 
 	e.GET("/users/:id", userHandler.GetUser)
 	e.POST("/users", userHandler.CreateUser)
