@@ -27,7 +27,7 @@ func (u *userRepo) FindUser(ctx context.Context, id values.UserID) (*entities.Us
 		return nil, err
 	}
 	user_entity := entities.User{
-		ID:        user.ID,
+		ID:        values.MustUserIDString(user.ID),
 		CreatedAt: user.CreatedAt,
 	}
 	return &user_entity, nil
@@ -40,7 +40,7 @@ func (u *userRepo) CreateUser(ctx context.Context) (*entities.User, error) {
 		return nil, err
 	}
 	user_entity := entities.User{
-		ID:        user.ID,
+		ID:        values.MustUserIDString(user.ID),
 		CreatedAt: user.CreatedAt,
 	}
 	return &user_entity, nil
