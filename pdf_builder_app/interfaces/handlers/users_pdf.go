@@ -24,9 +24,9 @@ func NewUsersPdfHandler(usersPdfUsecase usecases.UsersPdfUsecase) UsersPdfHandle
 func (u *usersPdfHandler) InitializeUsersPdf(c echo.Context) error {
 	ctx := c.Request().Context()
 
-	cmd := usecases.UsersPdfUsecaseInitializeUsersPdfCommand{UserID: c.Param("id")}
+	cmd := usecases.UsersPdfUsecaseConvertHtml2PdfCommand{UserID: c.Param("id")}
 
-	pdf, err := u.usersPdfUsecase.InitializeUsersPdf(ctx, cmd)
+	pdf, err := u.usersPdfUsecase.ConvertHtml2Pdf(ctx, cmd)
 	if err != nil {
 		return JsonError(c, err, &APIError{
 			Message: "ユーザーが見つかりませんでした",
