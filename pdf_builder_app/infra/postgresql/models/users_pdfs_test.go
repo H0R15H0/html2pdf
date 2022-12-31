@@ -831,7 +831,7 @@ func testUsersPDFToOneUserUsingUser(t *testing.T) {
 	var foreign User
 
 	seed := randomize.NewSeed()
-	if err := randomize.Struct(seed, &local, usersPDFDBTypes, true, usersPDFColumnsWithDefault...); err != nil {
+	if err := randomize.Struct(seed, &local, usersPDFDBTypes, false, usersPDFColumnsWithDefault...); err != nil {
 		t.Errorf("Unable to randomize UsersPDF struct: %s", err)
 	}
 	if err := randomize.Struct(seed, &foreign, userDBTypes, false, userColumnsWithDefault...); err != nil {
@@ -842,7 +842,7 @@ func testUsersPDFToOneUserUsingUser(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	queries.Assign(&local.UserID, foreign.ID)
+	local.UserID = foreign.ID
 	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
@@ -852,7 +852,7 @@ func testUsersPDFToOneUserUsingUser(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !queries.Equal(check.ID, foreign.ID) {
+	if check.ID != foreign.ID {
 		t.Errorf("want: %v, got %v", foreign.ID, check.ID)
 	}
 
@@ -924,7 +924,7 @@ func testUsersPDFToOneSetOpUserUsingUser(t *testing.T) {
 		if x.R.UsersPDFS[0] != &a {
 			t.Error("failed to append to foreign relationship struct")
 		}
-		if !queries.Equal(a.UserID, x.ID) {
+		if a.UserID != x.ID {
 			t.Error("foreign key was wrong value", a.UserID)
 		}
 
@@ -935,60 +935,9 @@ func testUsersPDFToOneSetOpUserUsingUser(t *testing.T) {
 			t.Fatal("failed to reload", err)
 		}
 
-		if !queries.Equal(a.UserID, x.ID) {
+		if a.UserID != x.ID {
 			t.Error("foreign key was wrong value", a.UserID, x.ID)
 		}
-	}
-}
-
-func testUsersPDFToOneRemoveOpUserUsingUser(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a UsersPDF
-	var b User
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, usersPDFDBTypes, false, strmangle.SetComplement(usersPDFPrimaryKeyColumns, usersPDFColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	if err = randomize.Struct(seed, &b, userDBTypes, false, strmangle.SetComplement(userPrimaryKeyColumns, userColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.SetUser(ctx, tx, true, &b); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.RemoveUser(ctx, tx, &b); err != nil {
-		t.Error("failed to remove relationship")
-	}
-
-	count, err := a.User().Count(ctx, tx)
-	if err != nil {
-		t.Error(err)
-	}
-	if count != 0 {
-		t.Error("want no relationships remaining")
-	}
-
-	if a.R.User != nil {
-		t.Error("R struct entry should be nil")
-	}
-
-	if !queries.IsValuerNil(a.UserID) {
-		t.Error("foreign key value should be nil")
-	}
-
-	if len(b.R.UsersPDFS) != 0 {
-		t.Error("failed to remove a from b's relationships")
 	}
 }
 

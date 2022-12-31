@@ -24,10 +24,10 @@ import (
 
 // UsersPDF is an object representing the database table.
 type UsersPDF struct {
-	ID        string      `boil:"id" json:"id" toml:"id" yaml:"id"`
-	UserID    null.String `boil:"user_id" json:"user_id,omitempty" toml:"user_id" yaml:"user_id,omitempty"`
-	S3URL     string      `boil:"s3_url" json:"s3_url" toml:"s3_url" yaml:"s3_url"`
-	UnifiedAt null.Time   `boil:"unified_at" json:"unified_at,omitempty" toml:"unified_at" yaml:"unified_at,omitempty"`
+	ID        string    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	UserID    string    `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
+	S3URL     string    `boil:"s3_url" json:"s3_url" toml:"s3_url" yaml:"s3_url"`
+	UnifiedAt null.Time `boil:"unified_at" json:"unified_at,omitempty" toml:"unified_at" yaml:"unified_at,omitempty"`
 
 	R *usersPDFR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L usersPDFL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -61,12 +61,12 @@ var UsersPDFTableColumns = struct {
 
 var UsersPDFWhere = struct {
 	ID        whereHelperstring
-	UserID    whereHelpernull_String
+	UserID    whereHelperstring
 	S3URL     whereHelperstring
 	UnifiedAt whereHelpernull_Time
 }{
 	ID:        whereHelperstring{field: "\"users_pdfs\".\"id\""},
-	UserID:    whereHelpernull_String{field: "\"users_pdfs\".\"user_id\""},
+	UserID:    whereHelperstring{field: "\"users_pdfs\".\"user_id\""},
 	S3URL:     whereHelperstring{field: "\"users_pdfs\".\"s3_url\""},
 	UnifiedAt: whereHelpernull_Time{field: "\"users_pdfs\".\"unified_at\""},
 }
@@ -110,8 +110,8 @@ type usersPDFL struct{}
 
 var (
 	usersPDFAllColumns            = []string{"id", "user_id", "s3_url", "unified_at"}
-	usersPDFColumnsWithoutDefault = []string{"id", "s3_url"}
-	usersPDFColumnsWithDefault    = []string{"user_id", "unified_at"}
+	usersPDFColumnsWithoutDefault = []string{"id", "user_id", "s3_url"}
+	usersPDFColumnsWithDefault    = []string{"unified_at"}
 	usersPDFPrimaryKeyColumns     = []string{"id"}
 	usersPDFGeneratedColumns      = []string{}
 )
@@ -452,9 +452,7 @@ func (usersPDFL) LoadUser(ctx context.Context, e boil.ContextExecutor, singular 
 		if object.R == nil {
 			object.R = &usersPDFR{}
 		}
-		if !queries.IsNil(object.UserID) {
-			args = append(args, object.UserID)
-		}
+		args = append(args, object.UserID)
 
 	} else {
 	Outer:
@@ -464,14 +462,12 @@ func (usersPDFL) LoadUser(ctx context.Context, e boil.ContextExecutor, singular 
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.UserID) {
+				if a == obj.UserID {
 					continue Outer
 				}
 			}
 
-			if !queries.IsNil(obj.UserID) {
-				args = append(args, obj.UserID)
-			}
+			args = append(args, obj.UserID)
 
 		}
 	}
@@ -529,7 +525,7 @@ func (usersPDFL) LoadUser(ctx context.Context, e boil.ContextExecutor, singular 
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.UserID, foreign.ID) {
+			if local.UserID == foreign.ID {
 				local.R.User = foreign
 				if foreign.R == nil {
 					foreign.R = &userR{}
@@ -684,7 +680,7 @@ func (o *UsersPDF) SetUser(ctx context.Context, exec boil.ContextExecutor, inser
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	queries.Assign(&o.UserID, related.ID)
+	o.UserID = related.ID
 	if o.R == nil {
 		o.R = &usersPDFR{
 			User: related,
@@ -701,39 +697,6 @@ func (o *UsersPDF) SetUser(ctx context.Context, exec boil.ContextExecutor, inser
 		related.R.UsersPDFS = append(related.R.UsersPDFS, o)
 	}
 
-	return nil
-}
-
-// RemoveUser relationship.
-// Sets o.R.User to nil.
-// Removes o from all passed in related items' relationships struct.
-func (o *UsersPDF) RemoveUser(ctx context.Context, exec boil.ContextExecutor, related *User) error {
-	var err error
-
-	queries.SetScanner(&o.UserID, nil)
-	if _, err = o.Update(ctx, exec, boil.Whitelist("user_id")); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	if o.R != nil {
-		o.R.User = nil
-	}
-	if related == nil || related.R == nil {
-		return nil
-	}
-
-	for i, ri := range related.R.UsersPDFS {
-		if queries.Equal(o.UserID, ri.UserID) {
-			continue
-		}
-
-		ln := len(related.R.UsersPDFS)
-		if ln > 1 && i < ln-1 {
-			related.R.UsersPDFS[i] = related.R.UsersPDFS[ln-1]
-		}
-		related.R.UsersPDFS = related.R.UsersPDFS[:ln-1]
-		break
-	}
 	return nil
 }
 
