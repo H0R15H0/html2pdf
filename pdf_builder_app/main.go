@@ -5,6 +5,8 @@ import (
 	"net/http"
 
 	"github.com/H0R15H0/html2pdf/pdf_builder_app/config"
+	"github.com/H0R15H0/html2pdf/pdf_builder_app/infra/gotenberg"
+	repositories2 "github.com/H0R15H0/html2pdf/pdf_builder_app/infra/gotenberg/repositories"
 	"github.com/H0R15H0/html2pdf/pdf_builder_app/infra/postgresql"
 	"github.com/H0R15H0/html2pdf/pdf_builder_app/infra/postgresql/repositories"
 	"github.com/H0R15H0/html2pdf/pdf_builder_app/interfaces/handlers"
@@ -25,12 +27,15 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	// TODO: set webhook urls.
+	html2PdfClient := gotenberg.NewGotenbergClient(cnf.Html2PdfServiceOrigin, "", "")
 	userRepo := repositories.NewUserRepo(db)
 	pdfRepo := repositories.NewPdfRepo(db)
 	partialPdfRepo := repositories.NewPartialPdfRepo(db)
+	html2PdfRepo := repositories2.NewHtml2PdfRepo(html2PdfClient)
 	userUsecase := usecases.NewUserUsecase(userRepo)
 	pdfUsecase := usecases.NewPdfUsecase(pdfRepo, userRepo)
-	partialPdfUsecase := usecases.NewPartialPdfUsecase(partialPdfRepo)
+	partialPdfUsecase := usecases.NewPartialPdfUsecase(partialPdfRepo, html2PdfRepo)
 	userHandler := handlers.NewUserHandler(userUsecase)
 	usersPdfHandler := handlers.NewUsersPdfHandler(pdfUsecase)
 	partialPdfHandler := handlers.NewPartialPdfHandler(partialPdfUsecase)

@@ -22,10 +22,11 @@ type PartialPdfUsecase interface {
 
 type partialPdfUsecase struct {
 	partialPdfRepo repositories.PartialPdfRepo
+	html2PdfRepo   repositories.Html2PdfRepo
 }
 
-func NewPartialPdfUsecase(pp repositories.PartialPdfRepo) PartialPdfUsecase {
-	return &partialPdfUsecase{partialPdfRepo: pp}
+func NewPartialPdfUsecase(pp repositories.PartialPdfRepo, h repositories.Html2PdfRepo) PartialPdfUsecase {
+	return &partialPdfUsecase{partialPdfRepo: pp, html2PdfRepo: h}
 }
 
 func (u *partialPdfUsecase) ConvertHtml2Pdf(ctx context.Context, cmd PartialPdfUsecaseConvertHtml2PdfCommand) (*entities.PartialPdf, error) {
@@ -34,13 +35,17 @@ func (u *partialPdfUsecase) ConvertHtml2Pdf(ctx context.Context, cmd PartialPdfU
 		return nil, err
 	}
 
-	// TODO: s3_url
+	// TODO: create pre-signed s3_url
 	pPdf, err := u.partialPdfRepo.Create(ctx, uPdfID, values.PartialPdfSourceHTMLUrl(cmd.SourceHTMLUrl), values.PartialPdfNumber(cmd.Number), values.PartialPdfS3URL("s3_url"))
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO: convert with gotenberg
+	// TODO: s3_url
+	err = u.html2PdfRepo.Send(ctx, values.Html2PdfHtmlUrl(pPdf.SourceHTMLURL))
+	if err != nil {
+		return nil, err
+	}
 
 	pPdf.PDFCreatedAt = values.PartialPdfCreatedAt(null.NewTime(time.Now(), true))
 
