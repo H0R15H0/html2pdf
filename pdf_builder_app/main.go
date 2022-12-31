@@ -28,8 +28,8 @@ func main() {
 	userRepo := repositories.NewUserRepo(db)
 	pdfRepo := repositories.NewPdfRepo(db)
 	userUsecase := usecases.NewUserUsecase(userRepo)
-	usersPdfUsecase := usecases.NewUsersPdfUsecase(pdfRepo, userRepo)
-	usersPdfHandlers := handlers.NewUsersPdfHandler(usersPdfUsecase)
+	pdfUsecase := usecases.NewPdfUsecase(pdfRepo, userRepo)
+	usersPdfHandlers := handlers.NewUsersPdfHandler(pdfUsecase)
 	userHandler := handlers.NewUserHandler(userUsecase)
 
 	e.GET("/users/:id", userHandler.GetUser)

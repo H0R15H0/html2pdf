@@ -12,21 +12,21 @@ type UsersPdfHandler interface {
 }
 
 type usersPdfHandler struct {
-	usersPdfUsecase usecases.UsersPdfUsecase
+	pdfUsecase usecases.PdfUsecase
 }
 
-func NewUsersPdfHandler(usersPdfUsecase usecases.UsersPdfUsecase) UsersPdfHandler {
+func NewUsersPdfHandler(pdfUsecase usecases.PdfUsecase) UsersPdfHandler {
 	return &usersPdfHandler{
-		usersPdfUsecase: usersPdfUsecase,
+		pdfUsecase: pdfUsecase,
 	}
 }
 
 func (u *usersPdfHandler) InitializeUsersPdf(c echo.Context) error {
 	ctx := c.Request().Context()
 
-	cmd := usecases.UsersPdfUsecaseConvertHtml2PdfCommand{UserID: c.Param("id")}
+	cmd := usecases.PdfUsecaseConvertHtml2PdfCommand{UserID: c.Param("id")}
 
-	pdf, err := u.usersPdfUsecase.ConvertHtml2Pdf(ctx, cmd)
+	pdf, err := u.pdfUsecase.ConvertHtml2Pdf(ctx, cmd)
 	if err != nil {
 		return JsonError(c, err, &APIError{
 			Message: "ユーザーが見つかりませんでした",
