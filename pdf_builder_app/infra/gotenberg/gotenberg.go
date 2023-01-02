@@ -12,19 +12,18 @@ import (
 
 type GotenbergClient struct {
 	Origin          string
-	WebhookUrl      string
 	WebhookErrorUrl string
 }
 
-func NewGotenbergClient(origin string, wUrl string, wErrUrl string) *GotenbergClient {
-	return &GotenbergClient{Origin: origin, WebhookUrl: wUrl, WebhookErrorUrl: wErrUrl}
+func NewGotenbergClient(origin string, wErrUrl string) *GotenbergClient {
+	return &GotenbergClient{Origin: origin, WebhookErrorUrl: wErrUrl}
 }
 
-func (c GotenbergClient) ConvertURLWithExtraHTTP(ctx context.Context, url string) error {
+func (c GotenbergClient) ConvertURLWithWebhook(ctx context.Context, htmlUrl string, webhookUrl string) error {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	part, _ := writer.CreateFormField("url")
-	io.WriteString(part, url)
+	io.WriteString(part, htmlUrl)
 	writer.Close()
 
 	// TODO: set Gotenberg-Webhook-Extra-Http-Headers to upload generated PDF to s3 bucket.

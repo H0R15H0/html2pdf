@@ -7,5 +7,5 @@ import (
 )
 
 type Html2PdfRepo interface {
-	Send(context.Context, values.Html2PdfHtmlUrl) error
+	Send(context.Context, values.Html2PdfHtmlUrl, values.FilePreSignedUrl) error
 }
