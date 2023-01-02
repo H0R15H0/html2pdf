@@ -9,6 +9,8 @@ import (
 	repositories2 "github.com/H0R15H0/html2pdf/pdf_builder_app/infra/gotenberg/repositories"
 	"github.com/H0R15H0/html2pdf/pdf_builder_app/infra/postgresql"
 	"github.com/H0R15H0/html2pdf/pdf_builder_app/infra/postgresql/repositories"
+	"github.com/H0R15H0/html2pdf/pdf_builder_app/infra/s3"
+	repositories3 "github.com/H0R15H0/html2pdf/pdf_builder_app/infra/s3/repositories"
 	"github.com/H0R15H0/html2pdf/pdf_builder_app/interfaces/handlers"
 	"github.com/H0R15H0/html2pdf/pdf_builder_app/usecases"
 	"github.com/labstack/echo/v4"
@@ -27,15 +29,28 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	s3Config := s3.S3Config{
+		ID:               cnf.AWSConfig.ID,
+		Secret:           cnf.AWSConfig.Secret,
+		Token:            cnf.AWSConfig.Token,
+		Region:           cnf.AWSConfig.Region,
+		Origin:           cnf.AWSConfig.S3Config.Origin,
+		S3ForcePathStyle: cnf.AWSConfig.S3Config.ForcePathStyle,
+	}
+	s3, err := s3.NewSession(s3Config)
+	if err != nil {
+		panic(err)
+	}
 	// TODO: set webhook urls.
-	html2PdfClient := gotenberg.NewGotenbergClient(cnf.Html2PdfServiceOrigin, "", "")
+	html2PdfClient := gotenberg.NewGotenbergClient(cnf.Html2PdfServiceOrigin, "")
+	filePartialPdfRepo := repositories3.NewFilePartialPdfRepo(s3, cnf.AWSConfig.S3Config.PartialPdfBucketName)
 	userRepo := repositories.NewUserRepo(db)
 	pdfRepo := repositories.NewPdfRepo(db)
 	partialPdfRepo := repositories.NewPartialPdfRepo(db)
 	html2PdfRepo := repositories2.NewHtml2PdfRepo(html2PdfClient)
 	userUsecase := usecases.NewUserUsecase(userRepo)
 	pdfUsecase := usecases.NewPdfUsecase(pdfRepo, userRepo)
-	partialPdfUsecase := usecases.NewPartialPdfUsecase(partialPdfRepo, html2PdfRepo)
+	partialPdfUsecase := usecases.NewPartialPdfUsecase(partialPdfRepo, html2PdfRepo, filePartialPdfRepo)
 	userHandler := handlers.NewUserHandler(userUsecase)
 	usersPdfHandler := handlers.NewUsersPdfHandler(pdfUsecase)
 	partialPdfHandler := handlers.NewPartialPdfHandler(partialPdfUsecase)
