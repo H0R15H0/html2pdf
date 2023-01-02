@@ -16,7 +16,7 @@ func NewHtml2PdfRepo(c *gotenberg.GotenbergClient) repositories.Html2PdfRepo {
 	return &html2PdfRepo{client: c}
 }
 
-func (r *html2PdfRepo) Send(ctx context.Context, htmlUrl values.Html2PdfHtmlUrl) error {
-	err := r.client.ConvertURLWithExtraHTTP(ctx, string(htmlUrl))
+func (r *html2PdfRepo) Send(ctx context.Context, htmlUrl values.Html2PdfHtmlUrl, s3Url values.FilePreSignedUrl) error {
+	err := r.client.ConvertURLWithWebhook(ctx, string(htmlUrl), string(s3Url))
 	return err
 }

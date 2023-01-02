@@ -21,12 +21,13 @@ type PartialPdfUsecase interface {
 }
 
 type partialPdfUsecase struct {
-	partialPdfRepo repositories.PartialPdfRepo
-	html2PdfRepo   repositories.Html2PdfRepo
+	partialPdfRepo     repositories.PartialPdfRepo
+	html2PdfRepo       repositories.Html2PdfRepo
+	filePartialPdfRepo repositories.FilePartialPdfRepo
 }
 
-func NewPartialPdfUsecase(pp repositories.PartialPdfRepo, h repositories.Html2PdfRepo) PartialPdfUsecase {
-	return &partialPdfUsecase{partialPdfRepo: pp, html2PdfRepo: h}
+func NewPartialPdfUsecase(pp repositories.PartialPdfRepo, h repositories.Html2PdfRepo, f repositories.FilePartialPdfRepo) PartialPdfUsecase {
+	return &partialPdfUsecase{partialPdfRepo: pp, html2PdfRepo: h, filePartialPdfRepo: f}
 }
 
 func (u *partialPdfUsecase) ConvertHtml2Pdf(ctx context.Context, cmd PartialPdfUsecaseConvertHtml2PdfCommand) (*entities.PartialPdf, error) {
@@ -35,14 +36,17 @@ func (u *partialPdfUsecase) ConvertHtml2Pdf(ctx context.Context, cmd PartialPdfU
 		return nil, err
 	}
 
-	// TODO: create pre-signed s3_url
 	pPdf, err := u.partialPdfRepo.Create(ctx, uPdfID, values.PartialPdfSourceHTMLUrl(cmd.SourceHTMLUrl), values.PartialPdfNumber(cmd.Number), values.PartialPdfS3URL("s3_url"))
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO: s3_url
-	err = u.html2PdfRepo.Send(ctx, values.Html2PdfHtmlUrl(pPdf.SourceHTMLURL))
+	preSignedUrl, err := u.filePartialPdfRepo.CreatePreSignedUrl(ctx, values.FilePdfKey(pPdf.ID.String()))
+	if err != nil {
+		return nil, err
+	}
+
+	err = u.html2PdfRepo.Send(ctx, values.Html2PdfHtmlUrl(pPdf.SourceHTMLURL), preSignedUrl)
 	if err != nil {
 		return nil, err
 	}
