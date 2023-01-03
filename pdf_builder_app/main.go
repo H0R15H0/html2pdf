@@ -42,7 +42,7 @@ func main() {
 		panic(err)
 	}
 	// TODO: set webhook urls.
-	html2PdfClient := gotenberg.NewGotenbergClient(cnf.Html2PdfServiceOrigin, "")
+	html2PdfClient := gotenberg.NewGotenbergClient(gotenberg.GotenbergConfig{ServiceOrigin: cnf.Html2PdfServiceConfig.Origin, WebhookMethod: cnf.Html2PdfServiceConfig.WebhookMethod, WebhookErrorUrl: cnf.Html2PdfServiceConfig.WebhookErrorUrl, WebhookErrorMethod: cnf.Html2PdfServiceConfig.WebhookErrorMethod})
 	filePartialPdfRepo := repositories3.NewFilePartialPdfRepo(s3, cnf.AWSConfig.S3Config.PartialPdfBucketName)
 	userRepo := repositories.NewUserRepo(db)
 	pdfRepo := repositories.NewPdfRepo(db)
@@ -59,6 +59,7 @@ func main() {
 	e.POST("/users", userHandler.CreateUser)
 	e.POST("/users/:id/pdfs", usersPdfHandler.InitializeUsersPdf)
 	e.POST("/users/:user_id/pdfs/:pdf_id/partials", partialPdfHandler.Create)
+	e.POST("/html2pdf/error", partialPdfHandler.Error)
 
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", cnf.Port)))
 }

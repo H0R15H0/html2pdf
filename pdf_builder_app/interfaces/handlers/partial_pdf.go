@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/H0R15H0/html2pdf/pdf_builder_app/usecases"
@@ -9,6 +10,7 @@ import (
 
 type PartialPdfHandler interface {
 	Create(echo.Context) error
+	Error(echo.Context) error
 }
 
 type partialPdfHandler struct {
@@ -45,4 +47,9 @@ func (u *partialPdfHandler) Create(c echo.Context) error {
 
 	data := map[string]interface{}{"pdf": pdf}
 	return c.JSON(http.StatusOK, data)
+}
+
+func (u *partialPdfHandler) Error(c echo.Context) error {
+	fmt.Println("html2pdf services convert failed.")
+	return c.JSON(http.StatusOK, "")
 }

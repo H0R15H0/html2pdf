@@ -8,10 +8,17 @@ import (
 )
 
 type config struct {
-	Port                  int       `env:"PORT" envDefault:"1323"`
-	Html2PdfServiceOrigin string    `env:"HTML2PDF_SERVICE_ORIGIN,required"`
-	DBConfig              DBConfig  `envPrefix:"DB_"`
-	AWSConfig             AWSConfig `envPrefix:"AWS_"`
+	Port                  int                   `env:"PORT" envDefault:"1323"`
+	Html2PdfServiceConfig Html2PdfServiceConfig `envPrefix:"HTML2PDF_SERVICE_"`
+	DBConfig              DBConfig              `envPrefix:"DB_"`
+	AWSConfig             AWSConfig             `envPrefix:"AWS_"`
+}
+
+type Html2PdfServiceConfig struct {
+	Origin             string `env:"ORIGIN,required"`
+	WebhookMethod      string `env:"WEBHOOK_METHOD,required"`
+	WebhookErrorUrl    string `env:"WEBHOOK_ERROR_URL,required"`
+	WebhookErrorMethod string `env:"WEBHOOK_ERROR_METHOD,required"`
 }
 
 type DBConfig struct {

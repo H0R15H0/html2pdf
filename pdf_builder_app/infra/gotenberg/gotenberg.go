@@ -7,16 +7,21 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
-	"os"
 )
 
 type GotenbergClient struct {
-	Origin          string
-	WebhookErrorUrl string
+	config GotenbergConfig
 }
 
-func NewGotenbergClient(origin string, wErrUrl string) *GotenbergClient {
-	return &GotenbergClient{Origin: origin, WebhookErrorUrl: wErrUrl}
+type GotenbergConfig struct {
+	ServiceOrigin      string
+	WebhookMethod      string
+	WebhookErrorUrl    string
+	WebhookErrorMethod string
+}
+
+func NewGotenbergClient(cnf GotenbergConfig) *GotenbergClient {
+	return &GotenbergClient{config: cnf}
 }
 
 func (c GotenbergClient) ConvertURLWithWebhook(ctx context.Context, htmlUrl string, webhookUrl string) error {
@@ -26,24 +31,19 @@ func (c GotenbergClient) ConvertURLWithWebhook(ctx context.Context, htmlUrl stri
 	io.WriteString(part, htmlUrl)
 	writer.Close()
 
-	// TODO: set Gotenberg-Webhook-Extra-Http-Headers to upload generated PDF to s3 bucket.
-	// https://github.com/gotenberg/gotenberg/issues/495
-	req, _ := http.NewRequest("POST", fmt.Sprintf("%s/forms/chromium/convert/url", c.Origin), body)
+	req, _ := http.NewRequest("POST", fmt.Sprintf("%s/forms/chromium/convert/url", c.config.ServiceOrigin), body)
 	req.Header.Add("Content-Type", writer.FormDataContentType())
+	req.Header.Add("Gotenberg-Webhook-Url", webhookUrl)
+	req.Header.Add("Gotenberg-Webhook-Method", c.config.WebhookMethod)
+	req.Header.Add("Gotenberg-Webhook-Error-Url", c.config.WebhookErrorUrl)
+	req.Header.Add("Gotenberg-Webhook-Error-Method", c.config.WebhookErrorMethod)
+
 	client := &http.Client{}
-	resp, err := client.Do(req)
 
+	_, err := client.Do(req)
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
 
-	out, err := os.Create("/app/hoge.pdf")
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-
-	_, err = io.Copy(out, resp.Body)
-	return err
+	return nil
 }
