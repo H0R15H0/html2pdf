@@ -58,6 +58,7 @@ func main() {
 	e.GET("/users/:id", userHandler.GetUser)
 	e.POST("/users", userHandler.CreateUser)
 	e.POST("/users/:id/pdfs", usersPdfHandler.InitializeUsersPdf)
+	e.POST("/users/:user_id/pdfs/:pdf_id/unify", usersPdfHandler.Unify)
 	e.POST("/users/:user_id/pdfs/:pdf_id/partials", partialPdfHandler.Create)
 	e.POST("/html2pdf/error", partialPdfHandler.Error)
 
