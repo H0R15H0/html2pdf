@@ -23,7 +23,7 @@ func NewFilePartialPdfRepo(c *s3.Client, b string) repositories.FilePartialPdfRe
 func (r *filePartialPdfRepo) CreatePreSignedUrl(ctx context.Context, key values.FilePdfKey) (values.FilePreSignedUrl, error) {
 	presignClient := s3.NewPresignClient(r.client)
 
-	presignParams := &s3.GetObjectInput{
+	presignParams := &s3.PutObjectInput{
 		Bucket: aws.String(r.bucketName),
 		Key:    aws.String(string(key)), // TODO: Don't use string() to stringify value object. define valueObject.String() and use it.
 	}
@@ -33,7 +33,7 @@ func (r *filePartialPdfRepo) CreatePreSignedUrl(ctx context.Context, key values.
 		po.Expires = 60 * time.Minute
 	}
 
-	presignResult, err := presignClient.PresignGetObject(context.TODO(), presignParams, presignDuration)
+	presignResult, err := presignClient.PresignPutObject(context.TODO(), presignParams, presignDuration)
 
 	if err != nil {
 		panic("Couldn't get presigned URL for GetObject")

@@ -22,7 +22,7 @@ type S3Config struct {
 func NewSession(cnf S3Config) (*s3.Client, error) {
 	cred := credentials.NewStaticCredentialsProvider(cnf.ID, cnf.Secret, cnf.Token)
 	endpointResolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
-		return aws.Endpoint{URL: cnf.Origin}, nil
+		return aws.Endpoint{URL: cnf.Origin, HostnameImmutable: true, SigningRegion: cnf.Region}, nil
 	})
 	cfg, err := config.LoadDefaultConfig(
 		context.TODO(),
