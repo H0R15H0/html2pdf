@@ -52,7 +52,7 @@ postgres-psql: ## docker compose run --rm postgresql psql
 
 ## Database
 db-create: ## create database
-	$(DOCKERCOMPOSE) exec $(POSTGRESQL_SERVICE) bash -c "psql -U $$DB_USER -c 'create database $(DB_NAME)'"
+	$(DOCKERCOMPOSE) exec $(POSTGRESQL_SERVICE) bash -c 'psql -U $$DB_USER -c "create database $(DB_NAME)"'
 db-migrate: ## migrate all
 	$(DOCKERCOMPOSE) exec $(PDF_BUILDER_SERVICE) sh -c 'migrate -database postgres://$$DB_USER:$$DB_PASS@$$DB_HOST:$$DB_PORT/$$DB_NAME?sslmode=disable -path database/migrations up'
 db-down: ## down all table
