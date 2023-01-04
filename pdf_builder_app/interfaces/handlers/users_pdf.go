@@ -9,6 +9,7 @@ import (
 
 type UsersPdfHandler interface {
 	InitializeUsersPdf(echo.Context) error
+	Unify(echo.Context) error
 }
 
 type usersPdfHandler struct {
@@ -37,4 +38,8 @@ func (u *usersPdfHandler) InitializeUsersPdf(c echo.Context) error {
 
 	data := map[string]interface{}{"pdf": pdf}
 	return c.JSON(http.StatusOK, data)
+}
+
+func (u *usersPdfHandler) Unify(c echo.Context) error {
+	return c.JSON(http.StatusOK, nil)
 }

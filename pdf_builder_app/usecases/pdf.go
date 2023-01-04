@@ -12,8 +12,13 @@ type PdfUsecaseCreateCommand struct {
 	UserID string
 }
 
+type PdfUsecaseUnifyCommand struct {
+	UserID string
+}
+
 type PdfUsecase interface {
 	Create(context.Context, PdfUsecaseCreateCommand) (*entities.Pdf, error)
+	Unify(context.Context, PdfUsecaseUnifyCommand) (, error)
 }
 
 type pdfUsecase struct {
