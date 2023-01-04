@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"github.com/H0R15H0/html2pdf/pdf_builder_app/domain/repositories"
@@ -24,8 +25,9 @@ func (r *filePartialPdfRepo) CreatePreSignedUrl(ctx context.Context, key values.
 	presignClient := s3.NewPresignClient(r.client)
 
 	presignParams := &s3.PutObjectInput{
-		Bucket: aws.String(r.bucketName),
-		Key:    aws.String(string(key)), // TODO: Don't use string() to stringify value object. define valueObject.String() and use it.
+		Bucket:      aws.String(r.bucketName),
+		Key:         aws.String(string(key)), // TODO: Don't use string() to stringify value object. define valueObject.String() and use it.
+		ContentType: aws.String("application/pdf"),
 	}
 
 	// Apply an expiration via an option function
@@ -41,4 +43,15 @@ func (r *filePartialPdfRepo) CreatePreSignedUrl(ctx context.Context, key values.
 
 	fmt.Printf("Presigned URL For object: %s\n", presignResult.URL)
 	return values.FilePreSignedUrl(presignResult.URL), nil
+}
+
+func (r *filePartialPdfRepo) GetObject(ctx context.Context, key values.FilePdfKey) (io.Reader, error) {
+	obj, err := r.client.GetObject(ctx, &s3.GetObjectInput{
+		Bucket: aws.String(r.bucketName),
+		Key:    aws.String(string(key)), // TODO: Remove .pdf
+	})
+	if err != nil {
+		return nil, err
+	}
+	return obj.Body, nil
 }

@@ -1,12 +1,17 @@
 package usecases
 
 import (
+	"bytes"
 	"context"
+	"fmt"
 	"io"
+	"net/http"
 
 	"github.com/H0R15H0/html2pdf/pdf_builder_app/domain/entities"
 	"github.com/H0R15H0/html2pdf/pdf_builder_app/domain/repositories"
 	"github.com/H0R15H0/html2pdf/pdf_builder_app/domain/values"
+	"github.com/pdfcpu/pdfcpu/pkg/api"
+	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu"
 )
 
 type PdfUsecaseCreateCommand struct {
@@ -20,7 +25,7 @@ type PdfUsecaseUnifyCommand struct {
 
 type PdfUsecase interface {
 	Create(context.Context, PdfUsecaseCreateCommand) (*entities.Pdf, error)
-	Unify(context.Context, PdfUsecaseUnifyCommand) (*io.Reader, error)
+	Unify(context.Context, PdfUsecaseUnifyCommand, http.ResponseWriter) (*string, error)
 }
 
 type pdfUsecase struct {
@@ -47,7 +52,7 @@ func (u *pdfUsecase) Create(ctx context.Context, cmd PdfUsecaseCreateCommand) (*
 	return pdf, nil
 }
 
-func (u *pdfUsecase) Unify(ctx context.Context, cmd PdfUsecaseUnifyCommand) (*io.Reader, error) {
+func (u *pdfUsecase) Unify(ctx context.Context, cmd PdfUsecaseUnifyCommand, w http.ResponseWriter) (*string, error) {
 	userID, err := values.UserIDString(cmd.UserID)
 	if err != nil {
 		return nil, err
@@ -57,21 +62,28 @@ func (u *pdfUsecase) Unify(ctx context.Context, cmd PdfUsecaseUnifyCommand) (*io
 		return nil, err
 	}
 
-	_, err = u.pdfRepo.FindWithRelation(ctx, userID, pdfID)
+	pdf, err := u.pdfRepo.FindWithRelation(ctx, userID, pdfID)
 	if err != nil {
 		return nil, err
 	}
 
-	return nil, nil
+	var partialPdfs []io.ReadSeeker
+	for _, pPdf := range pdf.PartialPdfs {
+		body, err := u.filePartialRepo.GetObject(ctx, values.FilePdfKey(pPdf.ID.String()))
+		if err != nil {
+			return nil, err
+		}
+		n, err := io.ReadAll(body)
+		if err != nil {
+			return nil, err
+		}
+		partialPdfs = append(partialPdfs, bytes.NewReader(n))
+	}
 
-	// var r io.Reader
-	// for _, pPdf := range pdf.PartialPdf {
-	// 	body, err := u.filePartialRepo.GetObject(ctx, values.FilePdfKey(pPdf.S3URL))
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// 	r = body
-	// }
+	config := pdfcpu.NewDefaultConfiguration()
+	err = api.Merge(partialPdfs, w, config)
 
-	// return &r, nil
+	pdfName := fmt.Sprintf("%s.pdf", pdfID.String())
+
+	return &pdfName, nil
 }

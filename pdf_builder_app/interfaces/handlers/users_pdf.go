@@ -45,7 +45,8 @@ func (u *usersPdfHandler) Unify(c echo.Context) error {
 
 	cmd := usecases.PdfUsecaseUnifyCommand{UserID: c.Param("user_id"), PdfID: c.Param("pdf_id")}
 
-	pdf, err := u.pdfUsecase.Unify(ctx, cmd)
+	resp := c.Response()
+	pdfName, err := u.pdfUsecase.Unify(ctx, cmd, resp.Writer)
 	if err != nil {
 		return JsonError(c, err, &APIError{
 			Message: "PDFが見つかりませんでした",
@@ -54,6 +55,10 @@ func (u *usersPdfHandler) Unify(c echo.Context) error {
 		})
 	}
 
-	data := map[string]interface{}{"pdf": pdf}
-	return c.JSON(http.StatusOK, data)
+	resp.Header().Set("Cache-Control", "no-store")
+	resp.Header().Set(echo.HeaderContentType, "application/pdf")
+	resp.Header().Set(echo.HeaderAccessControlExposeHeaders, "Content-Disposition")
+	resp.Header().Set(echo.HeaderContentDisposition, "attachment; filename="+*pdfName)
+
+	return c.NoContent(http.StatusOK)
 }
