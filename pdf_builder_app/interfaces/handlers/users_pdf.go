@@ -41,5 +41,19 @@ func (u *usersPdfHandler) InitializeUsersPdf(c echo.Context) error {
 }
 
 func (u *usersPdfHandler) Unify(c echo.Context) error {
-	return c.JSON(http.StatusOK, nil)
+	ctx := c.Request().Context()
+
+	cmd := usecases.PdfUsecaseUnifyCommand{UserID: c.Param("user_id"), PdfID: c.Param("pdf_id")}
+
+	pdf, err := u.pdfUsecase.Unify(ctx, cmd)
+	if err != nil {
+		return JsonError(c, err, &APIError{
+			Message: "PDFが見つかりませんでした",
+			Status:  http.StatusInternalServerError,
+			Code:    ErrCodeText(CodeClientHoge),
+		})
+	}
+
+	data := map[string]interface{}{"pdf": pdf}
+	return c.JSON(http.StatusOK, data)
 }

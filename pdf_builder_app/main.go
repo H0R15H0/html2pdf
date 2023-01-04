@@ -49,7 +49,7 @@ func main() {
 	partialPdfRepo := repositories.NewPartialPdfRepo(db)
 	html2PdfRepo := repositories2.NewHtml2PdfRepo(html2PdfClient)
 	userUsecase := usecases.NewUserUsecase(userRepo)
-	pdfUsecase := usecases.NewPdfUsecase(pdfRepo, userRepo)
+	pdfUsecase := usecases.NewPdfUsecase(pdfRepo, userRepo, filePartialPdfRepo)
 	partialPdfUsecase := usecases.NewPartialPdfUsecase(partialPdfRepo, html2PdfRepo, filePartialPdfRepo)
 	userHandler := handlers.NewUserHandler(userUsecase)
 	usersPdfHandler := handlers.NewUsersPdfHandler(pdfUsecase)
