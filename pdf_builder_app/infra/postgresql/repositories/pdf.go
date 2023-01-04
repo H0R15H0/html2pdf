@@ -60,10 +60,10 @@ func (r *pdfRepo) FindWithRelation(ctx context.Context, userID values.UserID, pd
 	}
 
 	pdfEntity := entities.Pdf{
-		ID:         values.MustPdfIDString(pdf.ID),
-		UserID:     userID,
-		S3URL:      values.PdfS3URL(pdf.S3URL),
-		PartialPdf: partialPdfs,
+		ID:          values.MustPdfIDString(pdf.ID),
+		UserID:      userID,
+		S3URL:       values.PdfS3URL(pdf.S3URL),
+		PartialPdfs: partialPdfs,
 	}
 
 	return &pdfEntity, nil

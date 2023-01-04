@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/H0R15H0/html2pdf/pdf_builder_app/domain/entities"
 	"github.com/H0R15H0/html2pdf/pdf_builder_app/usecases"
 	"github.com/labstack/echo/v4"
 )
@@ -53,6 +54,6 @@ func (u *userHandler) CreateUser(c echo.Context) error {
 		})
 	}
 
-	data := map[string]interface{}{"user": user}
+	data := map[string]*entities.User{"user": user}
 	return c.JSON(http.StatusOK, data)
 }

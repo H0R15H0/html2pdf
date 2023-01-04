@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/H0R15H0/html2pdf/pdf_builder_app/domain/entities"
 	"github.com/H0R15H0/html2pdf/pdf_builder_app/usecases"
 	"github.com/labstack/echo/v4"
 )
@@ -36,7 +37,7 @@ func (u *usersPdfHandler) InitializeUsersPdf(c echo.Context) error {
 		})
 	}
 
-	data := map[string]interface{}{"pdf": pdf}
+	data := map[string]*entities.Pdf{"pdf": pdf}
 	return c.JSON(http.StatusOK, data)
 }
 
