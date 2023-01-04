@@ -34,7 +34,7 @@ func (u *userUsecase) GetUser(ctx context.Context, cmd UserUsecaseGetUserCommand
 	if err != nil {
 		return nil, err
 	}
-	user, err := u.userRepo.FindUser(ctx, values.UserID(uuid))
+	user, err := u.userRepo.FindUser(ctx, values.UserID(uuid.String()))
 	if err != nil {
 		return nil, err
 	}

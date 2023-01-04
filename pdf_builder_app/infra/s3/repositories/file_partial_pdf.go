@@ -48,7 +48,7 @@ func (r *filePartialPdfRepo) CreatePreSignedUrl(ctx context.Context, key values.
 func (r *filePartialPdfRepo) GetObject(ctx context.Context, key values.FilePdfKey) (io.Reader, error) {
 	obj, err := r.client.GetObject(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(r.bucketName),
-		Key:    aws.String(string(key)), // TODO: Remove .pdf
+		Key:    aws.String(string(key)),
 	})
 	if err != nil {
 		return nil, err

@@ -5,12 +5,12 @@ import (
 	"github.com/volatiletech/null/v8"
 )
 
-type PartialPdfID uuid.UUID
+type PartialPdfID string
 
 var ZeroPartialPdfID PartialPdfID
 
 func (u PartialPdfID) String() string {
-	return uuid.UUID(u).String()
+	return string(u)
 }
 
 func PartialPdfIDString(s string) (PartialPdfID, error) {
@@ -18,7 +18,7 @@ func PartialPdfIDString(s string) (PartialPdfID, error) {
 	if err != nil {
 		return ZeroPartialPdfID, err
 	}
-	return PartialPdfID(pdfId), nil
+	return PartialPdfID(pdfId.String()), nil
 }
 
 func MustPartialPdfIDString(s string) PartialPdfID {

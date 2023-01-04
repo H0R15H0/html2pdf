@@ -2,12 +2,12 @@ package values
 
 import "github.com/google/uuid"
 
-type UserID uuid.UUID
+type UserID string
 
 var ZeroUserID UserID
 
 func (u UserID) String() string {
-	return uuid.UUID(u).String()
+	return string(u)
 }
 
 func UserIDString(s string) (UserID, error) {
@@ -15,7 +15,7 @@ func UserIDString(s string) (UserID, error) {
 	if err != nil {
 		return ZeroUserID, err
 	}
-	return UserID(userId), nil
+	return UserID(userId.String()), nil
 }
 
 func MustUserIDString(s string) UserID {

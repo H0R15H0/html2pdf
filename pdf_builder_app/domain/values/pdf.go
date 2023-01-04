@@ -2,12 +2,12 @@ package values
 
 import "github.com/google/uuid"
 
-type PdfID uuid.UUID
+type PdfID string
 
 var ZeroPdfID PdfID
 
 func (u PdfID) String() string {
-	return uuid.UUID(u).String()
+	return string(u)
 }
 
 func PdfIDString(s string) (PdfID, error) {
@@ -15,7 +15,7 @@ func PdfIDString(s string) (PdfID, error) {
 	if err != nil {
 		return ZeroPdfID, err
 	}
-	return PdfID(pdfId), nil
+	return PdfID(pdfId.String()), nil
 }
 
 func MustPdfIDString(s string) PdfID {
