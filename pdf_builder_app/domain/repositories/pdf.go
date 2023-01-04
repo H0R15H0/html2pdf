@@ -9,4 +9,5 @@ import (
 
 type PdfRepo interface {
 	CreateWithSource(context.Context, values.UserID) (*entities.Pdf, error)
+	FindWithRelation(context.Context, values.UserID, values.PdfID) (*entities.Pdf, error)
 }

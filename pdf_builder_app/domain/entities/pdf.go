@@ -6,8 +6,9 @@ import (
 )
 
 type Pdf struct {
-	ID        values.PdfID    `json:"id"`
-	UserID    values.UserID   `json:"userId"`
-	S3URL     values.PdfS3URL `json:"s3Url"`
-	UnifiedAt null.Time       `json:"unifiedAt"`
+	ID         values.PdfID    `json:"id"`
+	UserID     values.UserID   `json:"userId"`
+	S3URL      values.PdfS3URL `json:"s3Url"`
+	UnifiedAt  null.Time       `json:"unifiedAt"`
+	PartialPdf []*PartialPdf   `json:"partialPdf"`
 }
