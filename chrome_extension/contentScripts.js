@@ -42,7 +42,7 @@ chrome.runtime.onMessage.addListener((request) => {
   
           const link = document.createElement('a');
           link.href = objUrl;
-          link.download = "unifiedPdf";
+          link.download = `${document.title}.pdf`;
           link.click();
         })
       })
