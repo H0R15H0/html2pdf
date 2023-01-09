@@ -1,0 +1,8 @@
+{
+  "extName": {
+    "message": "HTML2PDF"
+  },
+  "extDescription": {
+    "message": "閲覧ページ中のページからリンクでたどることのできる複数ページをまとめてPDFに出力するツールです。"
+  }
+}

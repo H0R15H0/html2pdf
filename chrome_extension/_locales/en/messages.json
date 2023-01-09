@@ -1,0 +1,8 @@
+{
+  "extName": { 
+    "message": "HTML2PDF"
+  },
+  "extDescription": { 
+    "message": "Tool to output multiple pages into PDF that can be followed by links from pages in the browse page."
+  }
+}
