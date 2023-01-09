@@ -4,5 +4,8 @@
   },
   "extDescription": {
     "message": "閲覧ページ中のページからリンクでたどることのできる複数ページをまとめてPDFに出力するツールです。"
+  },
+  "convert": { 
+    "message": "PDFに変換"
   }
 }

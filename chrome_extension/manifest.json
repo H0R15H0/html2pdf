@@ -4,6 +4,12 @@
   "description": "__MSG_extDescription__",
   "version": "0.0.1",
   "default_locale": "en",
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["contentScripts.js"]
+    }
+  ],
   "action":{
     "default_title": "HTML2PDF",
     "default_popup": "popup.html"
