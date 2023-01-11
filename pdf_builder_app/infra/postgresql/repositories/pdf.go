@@ -40,7 +40,7 @@ func (r *pdfRepo) FindWithRelation(ctx context.Context, userID values.UserID, pd
 	pdf, err := models.UsersPDFS(
 		models.UsersPDFWhere.UserID.EQ(userID.String()),
 		models.UsersPDFWhere.ID.EQ(pdfID.String()),
-		qm.Load(qm.Rels(models.UsersPDFRels.UnifiedPDFPartialPDFS)),
+		qm.Load(qm.Rels(models.UsersPDFRels.UnifiedPDFPartialPDFS), qm.OrderBy("number asc")),
 	).One(ctx, r.db)
 	if err != nil {
 		return nil, err
