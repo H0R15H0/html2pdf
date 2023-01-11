@@ -5,3 +5,8 @@
 .selected {
   background-color: rgba(255,0,0,0.5);
 }
+
+#hp_manager_modal {
+  background-color: white;
+  border: 1px solid black;
+}

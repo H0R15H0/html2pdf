@@ -5,6 +5,9 @@
   "extDescription": { 
     "message": "Tool to output multiple pages into PDF that can be followed by links from pages in the browse page."
   },
+  "endBtn": {
+    "message": "Select End"
+  },
   "convert": { 
     "message": "Convert to PDF"
   }

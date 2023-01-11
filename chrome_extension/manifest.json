@@ -7,8 +7,8 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["contentScripts.js"],
-      "css": ["contentScripts.css"]
+      "js": ["contentScripts/main.js", "contentScripts/fetch.js"],
+      "css": ["contentScripts/main.css"]
     }
   ],
   "action":{

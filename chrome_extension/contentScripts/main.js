@@ -8,6 +8,7 @@ const sleep = (waitSeconds, callback) => {
 
 const UNSELECTED = 'unselected'
 const SELECTED = 'selected'
+const MANAGER_MODAL_ID = 'hp_manager_modal'
 
 const buildSelectBox = (el) => {
   const domRect = el.getBoundingClientRect()
@@ -20,6 +21,7 @@ const buildSelectBox = (el) => {
   selectBox.style.height = `${domRect.height}px`
   selectBox.addEventListener('click', () => {
     if (selectBox.className == UNSELECTED) {
+      // TODO: sort urls by y
       chrome.storage.local.get('selectedUrls', (obj) => {
         obj.selectedUrls.push(el.href)
         chrome.storage.local.set({selectedUrls: obj.selectedUrls})
@@ -44,47 +46,36 @@ const loadPage = () => {
   })
 }
 
+const buildManagerModal = () => {
+  const managerModal = document.createElement('div')
+  managerModal.id = MANAGER_MODAL_ID
+  managerModal.style.position = 'fixed'
+  managerModal.style.bottom = `0px`
+  managerModal.style.right = `0px`
+  const convertBtn = document.createElement('button')
+  convertBtn.textContent = chrome.i18n.getMessage("endBtn")
+  convertBtn.addEventListener('click', () => {
+    chrome.storage.local.get('selectedUrls', (obj) => {
+      fetchUrls(obj.selectedUrls).then(() => {
+        // TODO: clear all elements
+        console.log('fetch succeeded')
+      })
+    })
+  })
+  managerModal.appendChild(convertBtn)
+  return managerModal
+}
+
 const init = () => {
   chrome.storage.local.clear()
   chrome.storage.local.set({selectedUrls: []})
+  document.body.appendChild(buildManagerModal())
 }
 
 chrome.runtime.onMessage.addListener((request) => {
   switch (request.name)  {
     case "convert":
-      init();
-      loadPage().then(() => {console.log("load succeeded")})
-      sleep(10, async () => {
-        chrome.storage.local.get('selectedUrls', async (obj) => {
-          const hrefs = obj.selectedUrls
-          const resp = await fetch(`http://localhost:1323/users/4fae2802-7ad3-4ad3-a605-78685081cda8/pdfs`, {
-            method: 'POST',
-          })
-          const pdf = await resp.json()
-          await Promise.all(hrefs.map((url, idx) => {
-            return fetch(`http://localhost:1323/users/4fae2802-7ad3-4ad3-a605-78685081cda8/pdfs/${pdf.id}/partials`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                number: idx,
-                sourceHtmlUrl: url,
-              })
-            })
-          }))
-          sleep(20, async () => {
-            const resp = await fetch(`http://localhost:1323/users/4fae2802-7ad3-4ad3-a605-78685081cda8/pdfs/${pdf.id}/unify`, {
-              method: 'POST',
-            })
-            const blob = await resp.blob()
-            const objUrl = URL.createObjectURL(blob);
-    
-            const link = document.createElement('a');
-            link.href = objUrl;
-            link.download = `${document.title}.pdf`;
-            link.click();
-          })
-        })
-      })
+      loadPage().then(() => {init()})
       break;
   
     default:
