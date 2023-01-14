@@ -10,38 +10,30 @@ const UNSELECTED = 'unselected'
 const SELECTED = 'selected'
 const MANAGER_MODAL_ID = 'hp_manager_modal'
 
-const buildSelectBox = (el) => {
-  const domRect = el.getBoundingClientRect()
-  const selectBox = document.createElement('div')
-  selectBox.className = UNSELECTED
-  selectBox.style.position = 'absolute'
-  selectBox.style.top = `${document.documentElement.scrollTop + domRect.top}px`
-  selectBox.style.left = `${domRect.left}px`
-  selectBox.style.width = `${domRect.width}px`
-  selectBox.style.height = `${domRect.height}px`
-  selectBox.addEventListener('click', () => {
-    if (selectBox.className == UNSELECTED) {
+const buildSelectBox = (aTag) => {
+  aTag.className = UNSELECTED;
+  aTag.addEventListener('click', (e) => {
+    if (aTag.className == UNSELECTED) {
       // TODO: sort urls by y
       chrome.storage.local.get('selectedUrls', (obj) => {
-        obj.selectedUrls.push(el.href)
+        obj.selectedUrls.push(aTag.href)
         chrome.storage.local.set({selectedUrls: obj.selectedUrls})
       })
-      selectBox.className = SELECTED
+      aTag.className = SELECTED
     } else {
       chrome.storage.local.get('selectedUrls', (obj) => {
-        chrome.storage.local.set({selectedUrls: obj.selectedUrls.filter((u) => { return u != el.href })})
+        chrome.storage.local.set({selectedUrls: obj.selectedUrls.filter((u) => { return u != aTag.href })})
       })
-      selectBox.className = UNSELECTED
+      aTag.className = UNSELECTED
     }
+    e.preventDefault();
   })
-  return selectBox
 }
 
 const loadPage = () => {
   return sleep(1, () => {
     Object.values(document.getElementsByTagName("a")).forEach((a) => {
-      const selectBox = buildSelectBox(a)
-      document.body.appendChild(selectBox)
+      buildSelectBox(a)
     })
   })
 }
