@@ -52,6 +52,7 @@ const clearPage = () => {
   Object.values(document.getElementsByTagName("a")).forEach((a) => {
     clearSelectBox(a)
   })
+  document.getElementById(MANAGER_MODAL_ID).remove()
 }
 
 const buildManagerModal = () => {
