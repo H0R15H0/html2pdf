@@ -10,24 +10,29 @@ const UNSELECTED = 'unselected'
 const SELECTED = 'selected'
 const MANAGER_MODAL_ID = 'hp_manager_modal'
 
+const aTagOnClick = (e) => {
+  const aTag = e.path.find((path) => path.tagName == 'A')
+  e.preventDefault();
+  if (aTag.classList.contains(UNSELECTED)) {
+    // TODO: sort urls by y
+    chrome.storage.local.get('selectedUrls', (obj) => {
+      obj.selectedUrls.push(aTag.href)
+      chrome.storage.local.set({selectedUrls: obj.selectedUrls}, () => {
+        aTag.classList.replace(UNSELECTED, SELECTED)
+      })
+    })
+  } else {
+    chrome.storage.local.get('selectedUrls', (obj) => {
+      chrome.storage.local.set({selectedUrls: obj.selectedUrls.filter((u) => { return u != aTag.href })}, () => {
+        aTag.classList.replace(SELECTED, UNSELECTED)
+      })
+    })
+  }
+}
+
 const buildSelectBox = (aTag) => {
-  aTag.className = UNSELECTED;
-  aTag.addEventListener('click', (e) => {
-    if (aTag.className == UNSELECTED) {
-      // TODO: sort urls by y
-      chrome.storage.local.get('selectedUrls', (obj) => {
-        obj.selectedUrls.push(aTag.href)
-        chrome.storage.local.set({selectedUrls: obj.selectedUrls})
-      })
-      aTag.className = SELECTED
-    } else {
-      chrome.storage.local.get('selectedUrls', (obj) => {
-        chrome.storage.local.set({selectedUrls: obj.selectedUrls.filter((u) => { return u != aTag.href })})
-      })
-      aTag.className = UNSELECTED
-    }
-    e.preventDefault();
-  })
+  aTag.classList.add(UNSELECTED);
+  aTag.addEventListener('click', aTagOnClick)
 }
 
 const loadPage = () => {
@@ -35,6 +40,17 @@ const loadPage = () => {
     Object.values(document.getElementsByTagName("a")).forEach((a) => {
       buildSelectBox(a)
     })
+  })
+}
+
+const clearSelectBox = (aTag) => {
+  aTag.classList.remove(SELECTED, UNSELECTED)
+  aTag.removeEventListener('click', aTagOnClick)
+}
+
+const clearPage = () => {
+  Object.values(document.getElementsByTagName("a")).forEach((a) => {
+    clearSelectBox(a)
   })
 }
 
@@ -49,12 +65,19 @@ const buildManagerModal = () => {
   convertBtn.addEventListener('click', () => {
     chrome.storage.local.get('selectedUrls', (obj) => {
       fetchUrls(obj.selectedUrls).then(() => {
-        // TODO: clear all elements
         console.log('fetch succeeded')
+        clearPage()
       })
     })
   })
   managerModal.appendChild(convertBtn)
+  const clearBtn = document.createElement('button')
+  clearBtn.textContent = chrome.i18n.getMessage("clearBtn")
+  clearBtn.addEventListener('click', () => {
+    chrome.storage.local.clear()
+    clearPage()
+  })
+  managerModal.appendChild(clearBtn)
   return managerModal
 }
 

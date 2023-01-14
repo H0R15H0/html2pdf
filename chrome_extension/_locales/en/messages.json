@@ -8,6 +8,9 @@
   "endBtn": {
     "message": "Select End"
   },
+  "clearBtn": {
+    "message": "Cancel All"
+  },
   "convert": { 
     "message": "Convert to PDF"
   }

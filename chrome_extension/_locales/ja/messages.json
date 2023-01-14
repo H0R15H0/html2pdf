@@ -8,6 +8,9 @@
   "endBtn": {
     "message": "選択終了"
   },
+  "clearBtn": {
+    "message": "やめる"
+  },
   "convert": { 
     "message": "PDFに変換"
   }
