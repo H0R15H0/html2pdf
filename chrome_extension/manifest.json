@@ -7,7 +7,7 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["contentScripts/main.js", "contentScripts/fetch.js"],
+      "js": ["contentScripts/main.js", "contentScripts/fetch.js", "contentScripts/ui.js", "contentScripts/utils.js"],
       "css": ["contentScripts/main.css"]
     }
   ],
